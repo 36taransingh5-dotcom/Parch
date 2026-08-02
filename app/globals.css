@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+
+/* ─────────────────────────────────────────────────────────────
+   OpsPilot design tokens
+   Retro-futurist utility: warm paper, carbon ink, signal green.
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  --color-canvas: oklch(97.2% 0.006 80);
+  --color-surface: oklch(98.8% 0.004 80);
+  --color-surface-2: oklch(94.8% 0.006 80);
+  --color-line: oklch(86% 0.008 80);
+  --color-line-strong: oklch(72% 0.01 80);
+
+  --color-ink: oklch(19% 0.006 80);
+  --color-ink-2: oklch(38% 0.008 80);
+  --color-ink-3: oklch(56% 0.008 80);
+
+  --color-accent: oklch(88% 0.25 126);
+  --color-accent-soft: oklch(94% 0.12 126);
+  --color-accent-ink: oklch(24% 0.045 126);
+
+  --color-good: oklch(58% 0.15 152);
+  --color-good-soft: oklch(96% 0.04 152);
+  --color-warn: oklch(70% 0.16 75);
+  --color-warn-soft: oklch(97% 0.05 75);
+  --color-bad: oklch(58% 0.2 25);
+  --color-bad-soft: oklch(96% 0.04 25);
+
+  --radius-sm: 0.2rem;
+  --radius-md: 0.3rem;
+  --radius-lg: 0.4rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+  --radius-xl2: 0.5rem;
+
+  --font-sans:
+    'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    Impact, Haettenschweiler, 'Arial Narrow Bold', 'Arial Narrow', sans-serif;
+  --font-mono:
+    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+
+  --animate-rise: rise 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.25s ease both;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  --animate-sweep: sweep 1.4s linear infinite;
+  --animate-pop: pop 0.4s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes sweep {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 72% 8%, oklch(92% 0.035 350 / 0.28), transparent 24rem),
+      radial-gradient(circle at 30% 92%, oklch(92% 0.035 220 / 0.2), transparent 26rem),
+      var(--color-canvas);
+    background-attachment: fixed;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-stretch: condensed;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+  }
+}
+
+@layer components {
+  .card {
+    background: oklch(98.8% 0.004 80 / 0.82);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-xl2);
+    box-shadow:
+      inset 0 0 0 3px oklch(100% 0 0 / 0.35),
+      3px 3px 0 oklch(19% 0.006 80 / 0.05);
+    backdrop-filter: blur(12px);
+  }
+
+  .display-type {
+    font-family: var(--font-display);
+    font-stretch: condensed;
+    text-transform: uppercase;
+  }
+
+  .signal-grid {
+    background-image: radial-gradient(circle, var(--color-ink-3) 1px, transparent 1.2px);
+    background-size: 7px 7px;
+  }
+
+  /* Shimmer used while a tool is mid-flight. */
+  .shimmer {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(88% 0.25 126 / 0.25) 45%,
+      transparent 90%
+    );
+    background-size: 180% 100%;
+    animation: var(--animate-sweep);
+  }
+
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
+  /* Markdown rendered by the agent. */
+  .prose-agent {
+    line-height: 1.62;
+  }
+  .prose-agent p {
+    margin-block: 0.55rem;
+  }
+  .prose-agent p:first-child {
+    margin-top: 0;
+  }
+  .prose-agent p:last-child {
+    margin-bottom: 0;
+  }
+  .prose-agent ul,
+  .prose-agent ol {
+    margin-block: 0.55rem;
+    padding-left: 1.15rem;
+  }
+  .prose-agent ul {
+    list-style: disc;
+  }
+  .prose-agent ol {
+    list-style: decimal;
+  }
+  .prose-agent li {
+    margin-block: 0.2rem;
+  }
+  .prose-agent strong {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .prose-agent code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-line);
+    border-radius: 0.35rem;
+    padding: 0.08em 0.32em;
+  }
+  .prose-agent h1,
+  .prose-agent h2,
+  .prose-agent h3 {
+    font-weight: 600;
+    margin-block: 0.9rem 0.4rem;
+  }
+  .prose-agent a {
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
