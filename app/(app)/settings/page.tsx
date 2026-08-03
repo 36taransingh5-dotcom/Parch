@@ -2,11 +2,12 @@ import { ResetButton } from '@/components/settings/reset-button';
 import { Badge, Card, SectionHeading } from '@/components/ui/primitives';
 import { agentMode } from '@/lib/agent/run';
 import { openaiModel } from '@/lib/agent/openai';
+import { linqConfigured, linqWebhookConfigured } from '@/lib/linq/client';
 import { health, pravaMode } from '@/lib/prava/client';
 import { sensoConfigured } from '@/lib/senso/client';
 import { storeBackend } from '@/lib/store';
 
-export const metadata = { title: 'Settings · OpsPilot' };
+export const metadata = { title: 'Settings · Parch' };
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
@@ -46,6 +47,17 @@ export default async function SettingsPage() {
       hint: sensoConfigured()
         ? 'Senso scores are averaged with the local model so one flaky call cannot swing a recommendation.'
         : 'Set SENSO_API_KEY to fold live merchant verification into every trust check.',
+    },
+    {
+      name: 'Linq',
+      role: 'iMessage/SMS approvals',
+      live: linqConfigured(),
+      value: linqConfigured()
+        ? `Sends texts · replies ${linqWebhookConfigured() ? 'verified' : 'unverified (no LINQ_WEBHOOK_SECRET)'}`
+        : 'Off — approval card only',
+      hint: linqConfigured()
+        ? '"NO" cancels the request. "YES" gets a link back to the app — Prava needs a passkey tap in a browser, which a text reply cannot provide.'
+        : 'Set LINQ_API_KEY, LINQ_FROM_NUMBER and LINQ_TO_NUMBER to text the founder every time an approval is requested.',
     },
     {
       name: 'Supabase',

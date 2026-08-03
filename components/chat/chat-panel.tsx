@@ -344,7 +344,7 @@ export function ChatPanel() {
           </Button>
         </form>
         <p className="pb-3 text-center text-[11.5px] text-ink-3">
-          OpsPilot never pays without your approval.
+          Parch never pays without your approval.
         </p>
       </div>
 

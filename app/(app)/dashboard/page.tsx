@@ -6,7 +6,7 @@ import { getVendor } from '@/lib/catalog/vendors';
 import { getStats, listApprovals, listPurchases, listSubscriptions } from '@/lib/store';
 import { daysUntil, formatDate, formatMoney, relativeDays } from '@/lib/utils';
 
-export const metadata = { title: 'Dashboard · OpsPilot' };
+export const metadata = { title: 'Dashboard · Parch' };
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           sub={`${stats.upcomingRenewals} renew within 30 days`}
         />
         <Stat
-          label="Saved by OpsPilot"
+          label="Saved by Parch"
           value={formatMoney(stats.monthlySavings)}
           sub="per month vs the priciest shortlisted option"
           tone={stats.monthlySavings > 0 ? 'good' : undefined}
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
           {recent.length === 0 ? (
             <EmptyState
               title="Nothing bought yet"
-              body="Ask OpsPilot for something and approve it — purchases land here."
+              body="Ask Parch for something and approve it — purchases land here."
             />
           ) : (
             <ul className="divide-y divide-line border-t border-line">

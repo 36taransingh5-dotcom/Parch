@@ -1,4 +1,4 @@
-# OpsPilot
+# Parch
 
 **Your AI procurement employee.** Tell it what the team needs and what you'll spend. It researches
 the market, verifies the merchant, defends a recommendation — and once you approve, it actually
@@ -145,7 +145,7 @@ Copy `.env.example` to `.env.local`. Every key is optional.
 | `NEXT_PUBLIC_PUBLISHABLE_KEY` | Mounts the Prava PCI iframe | Simulated card sheet |
 | `NEXT_PUBLIC_PRAVA_BACKEND_URL` | Prava host (default sandbox) | — |
 | `SENSO_API_KEY` | Live merchant verification, blended in | Local trust model only |
-| `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | Postgres persistence | `.data/opspilot.json` |
+| `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | Postgres persistence | `.data/parch.json` |
 | `DEMO_COMPANY_NAME`, `DEMO_USER_EMAIL` | Company and approver identity | Acme Inc. / founder@acme.dev |
 
 `Settings` shows which mode each integration is in at a glance.

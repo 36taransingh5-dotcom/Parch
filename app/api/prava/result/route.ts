@@ -34,8 +34,18 @@ export async function POST(request: Request) {
     );
   }
 
-  if (result.status !== 'completed') {
-    const failure = result.transactions[0]?.error?.message;
+  // `awaiting_result` is the settled state from the cardholder's side: the
+  // card was entered, the passkey approved, and the network token + dynamic
+  // CVV are issued. Prava then *waits for us* to report the outcome before
+  // it moves the session to `completed` — so treating only `completed` as
+  // success would deadlock the checkout forever.
+  const settled = result.status === 'awaiting_result' || result.status === 'completed';
+
+  if (!settled) {
+    const failure =
+      result.status === 'failed'
+        ? (result.transactions[0]?.error?.message ?? 'Prava declined the transaction.')
+        : undefined;
     return Response.json({
       status: result.status,
       simulated: result.simulated,
@@ -48,19 +58,22 @@ export async function POST(request: Request) {
 
   if (!lineItem) {
     return Response.json(
-      { status: 'failed', message: 'Prava reported completion with no line item.' },
+      { status: 'failed', message: 'Prava issued no line item for this payment.' },
       { status: 502 },
     );
   }
 
   // Report before persisting: if this app crashes right after, Prava still
   // has a settled transaction rather than one stuck awaiting a result.
-  const reported = await reportStatus(
-    sessionId,
-    lineItem.txn_ref_id,
-    'APPROVED',
-    transaction.txn_id,
-  );
+  // A session already `completed` was reported on a previous poll.
+  let reported = true;
+  if (result.status === 'awaiting_result') {
+    reported = await reportStatus(sessionId, lineItem.txn_ref_id, 'APPROVED', transaction.txn_id);
+    if (!reported) {
+      // Transient reporting failure — stay in-flight so the next poll retries.
+      return Response.json({ status: 'pending', simulated: result.simulated });
+    }
+  }
 
   const approval = approvalId ? await getApproval(approvalId) : null;
   if (!approval) {

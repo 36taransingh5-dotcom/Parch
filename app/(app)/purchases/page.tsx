@@ -4,7 +4,7 @@ import { getVendor } from '@/lib/catalog/vendors';
 import { listPurchases } from '@/lib/store';
 import { formatDate, formatMoney, monthlyEquivalent } from '@/lib/utils';
 
-export const metadata = { title: 'Purchases · OpsPilot' };
+export const metadata = { title: 'Purchases · Parch' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_TONE = {
@@ -32,7 +32,7 @@ export default async function PurchasesPage() {
         </div>
         <Link
           href="/chat"
-          className="rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-[filter] hover:brightness-110"
+          className="display-type rounded-md border border-accent-ink/20 bg-accent px-4 py-2.5 text-xs tracking-wide text-ink shadow-[2px_2px_0_var(--color-ink)] transition-[filter,transform] duration-150 hover:brightness-105 active:translate-x-px active:translate-y-px"
         >
           New procurement
         </Link>

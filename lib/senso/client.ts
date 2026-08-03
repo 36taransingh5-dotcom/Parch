@@ -8,6 +8,20 @@ import type { TrustReport, Vendor } from '@/lib/types';
 // out — we fall back to a transparent local model built from the catalog's
 // published signals. A trust check must never be the thing that stalls a
 // live demo, so the fallback is the default path, not an error path.
+//
+// STATUS: the `/v1/search` path below is unverified. A live key confirmed
+// api.senso.ai is a real, reachable Django backend, but that route 404s —
+// the actual top-level resources are `knowledge/`, `posts/`, `orgs/`,
+// `collections/`, `cards/`, `agents/`, `knowledge-gaps/`, `interactions/`,
+// `events/`, `intents/`, `analytics/`, `sdk/`, `webhooks/`, `votes/`,
+// `user-groups/`, `templates/`, `waitlist/`, `users/` (from a Django debug
+// 404 page listing the urlconf). None of those probed successfully without
+// a resource id, and there's no confirmed schema for "score this external
+// merchant" — Senso's own onboarding flow describes it as a knowledge-base
+// / content-publishing / AI-visibility platform for a company's *own*
+// content, not a third-party trust-lookup API. Get real API docs before
+// changing this path; until then the local model is the only signal in
+// play, which is fine — it's transparent and already labelled as such.
 // ─────────────────────────────────────────────────────────────
 
 const SENSO_TIMEOUT_MS = 4_000;

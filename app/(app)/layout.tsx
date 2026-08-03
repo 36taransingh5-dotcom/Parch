@@ -31,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <circle cx="10" cy="10" r="2.1" fill="currentColor" />
             </svg>
           </span>
-          <span className="display-type text-[17px] tracking-wide">OpsPilot</span>
+          <span className="display-type text-[17px] tracking-wide">Parch</span>
         </Link>
 
         <nav className="flex flex-col gap-0.5">

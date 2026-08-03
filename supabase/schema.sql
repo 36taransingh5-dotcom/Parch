@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────
--- OpsPilot schema
+-- Parch schema
 --
 -- Optional. The app runs on a JSON file by default; run this only if you
 -- want Supabase persistence, then set NEXT_PUBLIC_SUPABASE_URL and

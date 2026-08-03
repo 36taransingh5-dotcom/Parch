@@ -4,7 +4,7 @@ import { VENDORS } from '@/lib/catalog/vendors';
 import { listSubscriptions } from '@/lib/store';
 import { daysUntil, formatMoney, monthlyEquivalent } from '@/lib/utils';
 
-export const metadata = { title: 'Renewals · OpsPilot' };
+export const metadata = { title: 'Renewals · Parch' };
 export const dynamic = 'force-dynamic';
 
 export default async function RenewalsPage() {

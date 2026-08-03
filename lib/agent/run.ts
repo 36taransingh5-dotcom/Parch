@@ -19,8 +19,17 @@ import {
 import { systemPrompt } from './prompts';
 import { runScripted } from './scripted';
 
-/** Hard ceiling on model→tool→model round trips for a single user turn. */
-const MAX_TURNS = 6;
+/**
+ * Hard ceiling on model→tool→model round trips for a single user turn.
+ *
+ * A full procurement run is search, fetchPricing, checkMerchantTrust,
+ * compareOptions, createRecommendation, requestApproval — six tool-bearing
+ * turns even when same-stage calls batch in parallel — plus one further
+ * turn where the model replies with no tool call at all (its closing
+ * message). Six was one turn short: the loop hit the cap exactly when
+ * requestApproval finished and the model never got to speak its summary.
+ */
+const MAX_TURNS = 10;
 
 export interface RunOptions {
   messages: WireMessage[];

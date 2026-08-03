@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import { Spinner } from '@/components/ui/primitives';
 
-export const metadata = { title: 'Chat · OpsPilot' };
+export const metadata = { title: 'Chat · Parch' };
 
 export default function ChatPage() {
   return (

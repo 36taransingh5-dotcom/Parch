@@ -37,7 +37,7 @@ export function QuickPrompt() {
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Ask OpsPilot to buy something — “error monitoring under $30/month”"
+        placeholder="Ask Parch to buy something — “error monitoring under $30/month”"
         className="min-w-0 flex-1 bg-transparent px-1 py-2.5 text-[15px] placeholder:text-ink-3 focus:outline-none"
       />
       <Button type="submit" disabled={!value.trim()}>

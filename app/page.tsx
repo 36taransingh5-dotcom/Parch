@@ -29,7 +29,7 @@ export default function LandingPage() {
         <header className="flex items-center justify-between py-6">
           <div className="flex items-center gap-2.5">
             <Logo />
-            <span className="text-[15px] font-semibold tracking-tight">OpsPilot</span>
+            <span className="text-[15px] font-semibold tracking-tight">Parch</span>
           </div>
           <Link
             href="/dashboard"
@@ -50,20 +50,20 @@ export default function LandingPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-pretty text-lg leading-relaxed text-ink-2">
-            Tell OpsPilot what your team needs and what you&rsquo;ll spend. It researches the
+            Tell Parch what your team needs and what you&rsquo;ll spend. It researches the
             market, defends a recommendation, and — once you approve — actually buys it.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/chat"
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-medium text-white shadow-sm shadow-accent/25 transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[.985]"
+              className="display-type inline-flex items-center gap-2 rounded-md border border-accent-ink/20 bg-accent px-6 py-3 text-xs tracking-wide text-ink shadow-[2px_2px_0_var(--color-ink)] transition-[filter,transform] duration-150 hover:brightness-105 active:translate-x-px active:translate-y-px"
             >
               Start Procuring
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-surface px-6 py-3 text-sm font-medium transition-colors hover:bg-surface-2"
+              className="display-type inline-flex items-center gap-2 rounded-md border border-line-strong bg-surface px-6 py-3 text-xs tracking-wide text-ink transition-colors hover:border-ink hover:bg-surface-2"
             >
               See the dashboard
             </Link>
@@ -123,7 +123,7 @@ export default function LandingPage() {
             </div>
             <Link
               href="/chat"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-ink px-5 py-2.5 text-sm font-medium text-white transition-[filter] hover:brightness-125"
+              className="display-type inline-flex shrink-0 items-center gap-2 rounded-md border border-ink bg-ink px-5 py-2.5 text-xs tracking-wide text-white shadow-[2px_2px_0_var(--color-accent)] transition-[filter,transform] duration-150 hover:brightness-125 active:translate-x-px active:translate-y-px"
             >
               Start Procuring
             </Link>
@@ -131,7 +131,7 @@ export default function LandingPage() {
         </section>
 
         <footer className="border-t border-line py-8 text-[13px] text-ink-3">
-          OpsPilot · Prava Hackathon 2026
+          Parch · Prava Hackathon 2026
         </footer>
       </div>
     </main>

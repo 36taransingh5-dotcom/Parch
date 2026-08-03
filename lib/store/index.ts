@@ -20,15 +20,15 @@ export type { DB } from './types';
 // Next.js recreates modules on hot reload; hang the driver off globalThis so
 // the in-process write queue and cache survive an edit.
 const globalRef = globalThis as typeof globalThis & {
-  __opspilotDriver?: StoreDriver;
-  __opspilotSeeding?: Promise<void>;
+  __parchDriver?: StoreDriver;
+  __parchSeeding?: Promise<void>;
 };
 
 function driver(): StoreDriver {
-  if (!globalRef.__opspilotDriver) {
-    globalRef.__opspilotDriver = createSupabaseDriver() ?? createFileDriver();
+  if (!globalRef.__parchDriver) {
+    globalRef.__parchDriver = createSupabaseDriver() ?? createFileDriver();
   }
-  return globalRef.__opspilotDriver;
+  return globalRef.__parchDriver;
 }
 
 export function storeBackend(): 'file' | 'supabase' {
@@ -40,8 +40,8 @@ export function storeBackend(): 'file' | 'supabase' {
  * clone still shows a populated dashboard. Runs at most once per process.
  */
 async function ensureSeeded() {
-  if (!globalRef.__opspilotSeeding) {
-    globalRef.__opspilotSeeding = (async () => {
+  if (!globalRef.__parchSeeding) {
+    globalRef.__parchSeeding = (async () => {
       const db = await driver().read();
       const empty =
         db.purchases.length === 0 &&
@@ -50,7 +50,7 @@ async function ensureSeeded() {
       if (empty) await driver().reset(buildSeed());
     })().catch(() => undefined);
   }
-  await globalRef.__opspilotSeeding;
+  await globalRef.__parchSeeding;
 }
 
 export async function readDB(): Promise<DB> {
@@ -336,5 +336,5 @@ export async function downgradeSubscription(
 
 export async function resetToSeed(): Promise<void> {
   await driver().reset(buildSeed());
-  globalRef.__opspilotSeeding = Promise.resolve();
+  globalRef.__parchSeeding = Promise.resolve();
 }

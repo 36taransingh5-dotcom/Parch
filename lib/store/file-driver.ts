@@ -1,9 +1,15 @@
 import { promises as fs } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { EMPTY_DB, type DB, type StoreDriver } from './types';
 
-const DATA_DIR = path.join(process.cwd(), '.data');
-const DATA_FILE = path.join(DATA_DIR, 'opspilot.json');
+// On serverless hosts the project directory is read-only — /tmp is the only
+// writable path. Data there is ephemeral, which is fine for a demo store;
+// Supabase is the persistence story in production.
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'parch-data')
+  : path.join(process.cwd(), '.data');
+const DATA_FILE = path.join(DATA_DIR, 'parch.json');
 
 /**
  * JSON-file driver. Chosen when Supabase is not configured so the app runs
@@ -40,8 +46,14 @@ class FileDriver implements StoreDriver {
 
   private async persist(db: DB) {
     this.cache = db;
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
+    // Best-effort: if the disk write fails (read-only filesystem), the
+    // in-memory cache still serves this process — don't fail the request.
+    try {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+      await fs.writeFile(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
+    } catch {
+      // Memory-only mode.
+    }
   }
 
   read(): Promise<DB> {

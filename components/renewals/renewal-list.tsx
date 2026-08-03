@@ -53,7 +53,7 @@ export function RenewalList({
     return (
       <EmptyState
         title="No subscriptions"
-        body="Renewals appear once OpsPilot buys something on a recurring plan."
+        body="Renewals appear once Parch buys something on a recurring plan."
       />
     );
   }
@@ -77,32 +77,46 @@ export function RenewalList({
           return (
             <li
               key={sub.id}
-              className={cn('flex flex-wrap items-center gap-3 px-5 py-4', cancelled && 'opacity-55')}
+              className={cn(
+                'flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center',
+                cancelled && 'opacity-55',
+              )}
             >
-              <VendorMark
-                initials={vendor?.initials ?? sub.vendor.slice(0, 2).toUpperCase()}
-                color={vendor?.brandColor ?? '#1F2937'}
-              />
+              <div className="flex min-w-0 items-center gap-3">
+                <VendorMark
+                  initials={vendor?.initials ?? sub.vendor.slice(0, 2).toUpperCase()}
+                  color={vendor?.brandColor ?? '#1F2937'}
+                />
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-medium">
-                  {sub.vendor}
-                  <span className="ml-2 text-[13px] font-normal text-ink-3">{sub.plan}</span>
-                </p>
-                <p className="truncate text-[13px] text-ink-3">
-                  {formatMoney(sub.price, sub.currency)}
-                  {sub.billing_cycle === 'annual' ? '/year' : '/month'} ·{' '}
-                  {cancelled ? 'cancelled' : `next ${formatDate(sub.next_payment)}`}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[15px] font-medium">
+                    {sub.vendor}
+                    <span className="ml-2 text-[13px] font-normal text-ink-3">{sub.plan}</span>
+                  </p>
+                  <p className="truncate text-[13px] text-ink-3">
+                    {formatMoney(sub.price, sub.currency)}
+                    {sub.billing_cycle === 'annual' ? '/year' : '/month'} ·{' '}
+                    {cancelled ? 'cancelled' : `next ${formatDate(sub.next_payment)}`}
+                  </p>
+                </div>
+
+                {!cancelled && (
+                  <Badge tone={days < 0 ? 'bad' : days <= 7 ? 'warn' : 'neutral'} className="shrink-0 sm:hidden">
+                    {relativeDays(sub.next_payment)}
+                  </Badge>
+                )}
               </div>
 
-              {!cancelled && (
-                <Badge tone={days < 0 ? 'bad' : days <= 7 ? 'warn' : 'neutral'}>
-                  {relativeDays(sub.next_payment)}
-                </Badge>
-              )}
+              <div className="relative flex items-center gap-2 sm:ml-auto">
+                {!cancelled && (
+                  <Badge
+                    tone={days < 0 ? 'bad' : days <= 7 ? 'warn' : 'neutral'}
+                    className="hidden shrink-0 sm:inline-flex"
+                  >
+                    {relativeDays(sub.next_payment)}
+                  </Badge>
+                )}
 
-              <div className="relative flex items-center gap-2">
                 {busy ? (
                   <span className="px-3 text-ink-3">
                     <Spinner />

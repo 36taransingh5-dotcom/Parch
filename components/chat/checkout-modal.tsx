@@ -243,7 +243,7 @@ export function CheckoutModal({
 function SimulatedCard({ busy }: { busy: boolean }) {
   return (
     <div className="space-y-4">
-      <div className="relative aspect-[1.6] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-ink to-accent p-5 text-white shadow-lg">
+      <div className="relative aspect-[1.6] w-full overflow-hidden rounded-2xl border border-accent/30 bg-gradient-to-br from-ink to-accent-ink p-5 text-white shadow-lg">
         <div className="flex h-full flex-col justify-between">
           <div className="flex items-start justify-between">
             <span className="text-[13px] font-medium opacity-80">Prava network token</span>

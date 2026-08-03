@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'OpsPilot — Your AI Procurement Employee',
+  title: 'Parch — Your AI Procurement Employee',
   description:
-    'OpsPilot researches vendors, compares pricing, verifies merchants and buys software for your startup — with your approval, paid through Prava.',
+    'Parch researches vendors, compares pricing, verifies merchants and buys software for your startup — with your approval, paid through Prava.',
 };
 
 export const viewport: Viewport = {

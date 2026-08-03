@@ -63,7 +63,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   <div class="sheet">
     <header>
       <div>
-        <div class="brand">OpsPilot</div>
+        <div class="brand">Parch</div>
         <div class="muted">Procurement for ${escapeHtml(company)}</div>
       </div>
       <div style="text-align:right">
@@ -98,7 +98,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     <footer>
       Paid with a single-use network token issued by Prava${purchase?.card_last4 ? ` (••••&nbsp;${escapeHtml(purchase.card_last4)})` : ''}.
       ${purchase?.renewal_date ? `Renews ${formatDate(purchase.renewal_date)}.` : 'No recurring charge.'}
-      <br>Approved by ${escapeHtml(billedTo)} · researched and executed by OpsPilot.
+      <br>Approved by ${escapeHtml(billedTo)} · researched and executed by Parch.
     </footer>
   </div>
 </body>

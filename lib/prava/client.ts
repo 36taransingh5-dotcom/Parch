@@ -114,11 +114,14 @@ export async function createSession(input: CreateSessionInput): Promise<PravaSes
       user_email: input.userEmail,
       total_amount: money(input.amount),
       currency: input.currency ?? 'USD',
+      // The card form is mounted in-page via the SDK (hosted iframe_url is
+      // the fallback), so declare the embedded surface.
+      integration_type: 'embedding',
       description: input.description,
       purchase_context: [
         {
           // The DESTINATION merchant — the SaaS vendor the founder is buying
-          // from, not OpsPilot. This name is what renders on the checkout
+          // from, not Parch. This name is what renders on the checkout
           // page and what reaches the card network as merchant of record.
           merchant_details: {
             name: input.merchant.name,
@@ -196,11 +199,20 @@ export async function reportStatus(
     body: JSON.stringify({
       txn_ref_id: txnRefId,
       txn_status: status,
+      response_code: status === 'APPROVED' ? '00' : '05',
       ...(authorizationCode && { authorization_code: authorizationCode }),
     }),
   });
 
-  return res.ok;
+  if (res.ok) return true;
+
+  // INVALID_STATE means this transaction was already reported (e.g. a
+  // previous poll reported it but the process died before persisting).
+  // That is success for our purposes — never let it wedge the checkout.
+  const body = (await res.json().catch(() => null)) as {
+    error?: { code?: string };
+  } | null;
+  return body?.error?.code === 'INVALID_STATE';
 }
 
 export async function health(): Promise<boolean> {

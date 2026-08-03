@@ -34,7 +34,7 @@ export function ComparisonTable({
                 <span className="flex items-center gap-2 font-medium text-ink">
                   {row.vendor}
                   {winner === row.slug && (
-                    <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    <span className="rounded-full border border-accent-ink/15 bg-accent px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-ink">
                       Pick
                     </span>
                   )}

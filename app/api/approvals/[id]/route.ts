@@ -54,7 +54,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       userEmail: approvedBy,
       amount: approval.price,
       currency: approval.currency,
-      description: `${approval.vendor} ${approval.plan} — procured by OpsPilot`,
+      description: `${approval.vendor} ${approval.plan} — procured by Parch`,
       merchant: {
         name: approval.vendor,
         url: vendor?.url ?? `https://${approval.vendor_slug}.com`,

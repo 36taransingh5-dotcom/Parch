@@ -9,6 +9,7 @@ import {
   resolveCategory,
   vendorsInCategory,
 } from '@/lib/catalog/vendors';
+import { notifyApproval } from '@/lib/linq/client';
 import { checkMerchantTrust as sensoTrust } from '@/lib/senso/client';
 import { createApproval } from '@/lib/store';
 import type {
@@ -488,6 +489,11 @@ async function requestApproval(
   });
 
   ctx.approval = approval;
+
+  // Best-effort: notifyApproval swallows its own failures, so a missing or
+  // rejected Linq key can never stall the tool call the way a real error
+  // would.
+  await notifyApproval(approval, recommendation);
 
   return {
     result: {
