@@ -4,15 +4,13 @@
 the market, verifies the merchant, defends a recommendation — and once you approve, it actually
 buys the thing through [Prava](https://prava.space).
 
-Built for the Prava Hackathon 2026.
-
 **Live: [parch-eta.vercel.app](https://parch-eta.vercel.app/)**
 
 <p>
   <img alt="Next.js 15" src="https://img.shields.io/badge/Next.js-15-black">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6">
   <img alt="Tailwind CSS v4" src="https://img.shields.io/badge/Tailwind-v4-38bdf8">
-  <img alt="Zero-config demo mode" src="https://img.shields.io/badge/demo%20mode-zero--config-22c55e">
+  <img alt="Zero-config" src="https://img.shields.io/badge/setup-zero--config-22c55e">
 </p>
 
 ---
@@ -35,26 +33,26 @@ Add keys to light up the real integrations one at a time (see [Configuration](#c
 
 ---
 
-## The demo, in 90 seconds
+## Example
 
-1. Go to **Chat** and ask: *"Buy an email provider for our startup under $40/month."*
-2. Watch the tool cards land in order — vendors found, pricing read, four merchants trust-checked,
-   options compared. Click any card to expand the underlying data.
-3. Read the recommendation. It names the number that decided it and the trade-off it accepted.
-4. Click **Approve & pay**. Prava opens a checkout session for exactly that amount.
-5. Authorise. The payment settles, the outcome is reported back to Prava, and the receipt appears
+Ask it something like *"Buy an email provider for our startup under $40/month"* in **Chat**, and
+here's what happens:
+
+1. Tool cards land in order — vendors found, pricing read, four merchants trust-checked, options
+   compared. Click any card to expand the underlying data.
+2. It gives a recommendation that names the one number that decided it and the trade-off it
+   accepted, then stops and asks for approval.
+3. Click **Approve & pay**. Prava opens a checkout session for exactly that amount.
+4. Authorise. The payment settles, the outcome is reported back to Prava, and a receipt appears
    inline with the transaction ID and the last four of the network token.
-6. Check **Dashboard**, **Purchases** and **Renewals** — the purchase, invoice and next payment
-   date are all there.
+5. **Dashboard**, **Purchases** and **Renewals** all pick up the purchase, invoice and next payment
+   date immediately.
 
-Other prompts worth trying:
+It handles other categories the same way — an AI code assistant under a per-seat budget, a
+password manager for a specific headcount (correctly weighing 1Password's flat starter pack
+against per-seat pricing), error monitoring under a monthly cap, and so on.
 
-- *"We're hiring a developer — get them the best AI code assistant under $25/month."*
-- *"Find us a password manager for 6 people."* — watch it price per-seat plans against 1Password's
-  flat starter pack and pick correctly.
-- *"We need error monitoring for production. Budget $30/month."*
-
-`Settings → Reset demo data` puts everything back between runs.
+`Settings` has a one-click reset back to the seed data if you want a clean slate.
 
 ---
 
@@ -114,11 +112,11 @@ the same stream events:
 - **`lib/agent/openai.ts` + `run.ts`** — OpenAI Responses API with function calling and parallel
   tool calls, streamed over SSE. Used when `OPENAI_API_KEY` is set.
 - **`lib/agent/scripted.ts`** — a deterministic agent that runs the identical workflow. Used when
-  no key is set, *and* as an automatic rescue if the model call fails before producing output. A
-  live demo should not be one API outage away from a blank screen.
+  no key is set, *and* as an automatic rescue if the model call fails before producing output. The
+  product shouldn't be one API outage away from a blank screen.
 
-The Responses API is called over plain `fetch` rather than through the SDK, so an SDK major bump
-can't break the agent loop on demo morning.
+The Responses API is called over plain `fetch` rather than through the SDK, so an upstream SDK
+bump can't silently break the agent loop.
 
 ### Trust scoring
 
@@ -136,8 +134,9 @@ Without a Senso key the local model answers alone, labelled as such in the UI.
 strengths, trade-offs and trust signals.
 
 The agent researches against this catalog rather than live-crawling pricing pages: a procurement
-run has to finish in under two minutes and produce the same result every time a judge runs it.
-Prices carry a `capturedAt` date and the UI says so out loud rather than implying a live quote.
+run needs to finish in a couple of minutes and produce the same result on repeat runs, not depend
+on a scrape succeeding at request time. Prices carry a `capturedAt` date and the UI says so out
+loud rather than implying a live quote.
 
 ### Persistence
 
@@ -294,9 +293,10 @@ supabase/schema.sql
 - The scripted agent's ranking uses an editorial "fit" prior (`lib/agent/scripted.ts`) alongside
   trust and budget headroom. It's kept out of the vendor catalog on purpose — the catalog holds
   verifiable facts, that map holds a judgement call, and the LLM path ignores it entirely.
-- Single demo company, no auth. Approvals are recorded against `DEMO_USER_EMAIL`.
+- No multi-tenancy or auth — single company, approvals recorded against `DEMO_USER_EMAIL`. Adding
+  real auth and per-company scoping is the natural next step before this handles more than one team.
 - Linq replies are matched to a pending approval by an in-memory map that resets on redeploy —
-  fine for a demo, would want a persisted mapping for production use.
+  fine for a single instance, would want a persisted mapping across processes at real scale.
 - `npm audit` reports advisories in `postcss` and `sharp`, both transitive dependencies bundled
   inside Next.js itself. There is no fix short of downgrading Next to v9; the app pins the patched
   15.5.22.
@@ -308,3 +308,7 @@ supabase/schema.sql
 Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 · OpenAI Responses API ·
 [Prava](https://prava.space) for PCI-compliant payments · [Senso](https://senso.ai) for merchant
 trust · [Linq](https://linqapp.com) for iMessage/SMS · Supabase (optional persistence)
+
+---
+
+Originally built at the Prava Hackathon 2026.
