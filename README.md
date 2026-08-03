@@ -6,9 +6,22 @@ buys the thing through [Prava](https://prava.space).
 
 Built for the Prava Hackathon 2026.
 
+**Live: [parch-eta.vercel.app](https://parch-eta.vercel.app/)**
+
+<p>
+  <img alt="Next.js 15" src="https://img.shields.io/badge/Next.js-15-black">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6">
+  <img alt="Tailwind CSS v4" src="https://img.shields.io/badge/Tailwind-v4-38bdf8">
+  <img alt="Zero-config demo mode" src="https://img.shields.io/badge/demo%20mode-zero--config-22c55e">
+</p>
+
 ---
 
 ## Run it
+
+Try the [live deployment](https://parch-eta.vercel.app/) first — no install needed.
+
+To run it yourself:
 
 ```bash
 npm install && npm run dev
@@ -54,10 +67,12 @@ no function it can call that moves money.
 
 The only path to a charge is a human clicking Approve in the browser, which hits
 `POST /api/approvals/[id]` — a route the model cannot reach. That route opens the Prava session,
-and the browser drives the PCI checkout from there.
+and the browser drives the PCI checkout from there. Every approval is also HMAC-signed
+(`lib/approvals/proof.ts`) so it can't be replayed or edited in transit between client and server.
 
 This means no prompt, no poisoned vendor page and no model mistake can result in a purchase. The
-guarantee is structural, not a rule in a system prompt hoping to be obeyed.
+guarantee is structural, not a rule in a system prompt hoping to be obeyed. The same rule holds
+even over text message — see [Linq](#linq-imessagesms-approvals-optional) below.
 
 ---
 
@@ -76,9 +91,9 @@ compareOptions ── normalised to monthly cost, flagged against budget
    ↓
 createRecommendation ─ pick, pros, honest cons, runner-up
    ↓
-requestApproval ─ ⛔ agent stops here
+requestApproval ─ ⛔ agent stops here · approval is HMAC-signed · (optional) texted via Linq
    ↓
-[HUMAN CLICKS APPROVE]
+[HUMAN CLICKS APPROVE — in the app, or opens the app from a text reply]
    ↓
 POST /v1/sessions ─────────────► Prava
    ↓
@@ -131,6 +146,29 @@ Prices carry a `capturedAt` date and the UI says so out loud rather than implyin
 run concurrently and a read-modify-write on one file is otherwise a lost update waiting to happen.
 Both drivers implement the same `StoreDriver` interface.
 
+### Payments (Prava)
+
+`lib/prava/client.ts` wraps the three-call Prava flow — create session, poll `payment-result`,
+`report-status` the outcome — and falls back to a fully simulated version of the same state machine
+when no key is configured, so the checkout UI is exercised identically either way. Card data never
+reaches this app: what comes back from a real session is a single-use Visa network token with a
+dynamic CVV.
+
+### Linq (iMessage/SMS approvals, optional)
+
+When `LINQ_API_KEY`, `LINQ_FROM_NUMBER` and `LINQ_TO_NUMBER` are set, every approval request also
+goes out as a text (`lib/linq/client.ts`) — vendor, price, reasoning, trust score. A **"NO"** reply
+cancels the request outright; that's a safe status flip, handled by the webhook
+(`app/api/linq/webhook/route.ts`).
+
+A **"YES"** reply deliberately does *not* charge anything. Completing a Prava purchase requires a
+WebAuthn passkey ceremony in a browser, which an inbound text can't satisfy — and shouldn't be able
+to. "YES" gets a reply with a link back to the app instead. This is the same no-payment-tool
+guarantee as the chat agent, extended to a second surface instead of weakened for it.
+
+Fully optional — with these unset, no text is sent and the in-app approval card works exactly the
+same.
+
 ---
 
 ## Configuration
@@ -146,6 +184,9 @@ Copy `.env.example` to `.env.local`. Every key is optional.
 | `NEXT_PUBLIC_PRAVA_BACKEND_URL` | Prava host (default sandbox) | — |
 | `SENSO_API_KEY` | Live merchant verification, blended in | Local trust model only |
 | `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | Postgres persistence | `.data/parch.json` |
+| `LINQ_API_KEY` + `LINQ_FROM_NUMBER` + `LINQ_TO_NUMBER` | Texts the founder every approval request | Approval card only, no text |
+| `LINQ_WEBHOOK_SECRET` | Verifies inbound Linq replies are genuine | Skipped (fine locally, not for a real deployment) |
+| `APPROVAL_SIGNING_SECRET` | HMAC key for approval integrity | Falls back to `MERCHANT_SECRET_KEY`, then `OPENAI_API_KEY`, then a fixed dev string |
 | `DEMO_COMPANY_NAME`, `DEMO_USER_EMAIL` | Company and approver identity | Acme Inc. / founder@acme.dev |
 
 `Settings` shows which mode each integration is in at a glance.
@@ -157,6 +198,10 @@ Copy `.env.example` to `.env.local`. Every key is optional.
 3. Approve a purchase. The first run on a new browser triggers device binding — the sandbox test
    OTP is `456789` — then registers a passkey on the card network's hosted page. **Budget 2–3
    minutes for the first run**; repeat purchases on the same browser are one biometric prompt.
+4. If you're testing locally, serve the app over real HTTPS once you get to the passkey step —
+   some card-network verification steps refuse to run against a plain `http://localhost` origin. A
+   quick tunnel (`cloudflared tunnel --url http://localhost:3000`, no account needed) is enough.
+   The live Vercel deployment already runs on a real HTTPS domain, so this only matters locally.
 
 Card data never touches this app. What comes back is a single-use Visa network token with a dynamic
 CVV, and every outcome is reported to Prava with `report-status` — unreported checkouts stay stuck
@@ -169,6 +214,39 @@ psql "$SUPABASE_DB_URL" -f supabase/schema.sql
 ```
 
 Then set the two Supabase variables. The driver switches over automatically.
+
+### Linq
+
+Set the three send-side variables to start texting approval requests. To handle replies, deploy
+somewhere with a public HTTPS URL, then register the webhook once:
+
+```bash
+curl -X POST https://api.linqapp.com/api/partner/v3/webhook-subscriptions \
+  -H "Authorization: Bearer $LINQ_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"target_url": "https://<your-domain>/api/linq/webhook?version=2026-02-03", "subscribed_events": ["message.received"]}'
+```
+
+---
+
+## Deploy
+
+Live at **[parch-eta.vercel.app](https://parch-eta.vercel.app/)**.
+
+The app is a standard Next.js 15 project — deploys anywhere Next.js does. To deploy your own:
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Set the environment variables from `.env.example` in the Vercel project settings (all optional —
+the app still runs in full demo mode with none of them set). Set `NEXT_PUBLIC_APP_URL` to your
+deployed domain if you're using Linq — it's what gets sent in the "open the app" text reply.
+
+If you're using the file-backed store, note that serverless filesystems are ephemeral per
+invocation: point `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` at a real Postgres
+instance for persistence that survives a redeploy.
 
 ---
 
@@ -184,6 +262,7 @@ app/
     prava/result/           poll · report-status · write the purchase
     renewals/               renew · cancel · downgrade
     invoices/[id]/          printable HTML invoice
+    linq/webhook/           inbound iMessage/SMS replies
     status/  reset/         integration status · demo reset
 components/
   chat/                     tool cards, comparison table, trust badge,
@@ -194,6 +273,8 @@ lib/
   tools/                    the six tools the agent can call
   prava/                    session · payment-result · report-status (+ simulator)
   senso/                    trust scoring
+  linq/                     iMessage/SMS notifications
+  approvals/                HMAC signing for approval integrity
   catalog/                  vendor knowledge base
   store/                    file + Supabase drivers behind one interface
 supabase/schema.sql
@@ -203,12 +284,27 @@ supabase/schema.sql
 
 ## Known limits
 
+- The live deployment runs on the file-backed store (no Supabase project wired up yet), so on
+  Vercel's serverless filesystem a purchase made in one request isn't guaranteed to be visible on
+  the next — the workflow itself still runs end to end, but persistence across requests is best
+  demonstrated locally, or on Vercel once `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`
+  are set.
 - The vendor catalog is a fixed snapshot, not a live crawler. Prices are published list rates
   captured on the date shown in each pricing card.
 - The scripted agent's ranking uses an editorial "fit" prior (`lib/agent/scripted.ts`) alongside
   trust and budget headroom. It's kept out of the vendor catalog on purpose — the catalog holds
   verifiable facts, that map holds a judgement call, and the LLM path ignores it entirely.
 - Single demo company, no auth. Approvals are recorded against `DEMO_USER_EMAIL`.
+- Linq replies are matched to a pending approval by an in-memory map that resets on redeploy —
+  fine for a demo, would want a persisted mapping for production use.
 - `npm audit` reports advisories in `postcss` and `sharp`, both transitive dependencies bundled
   inside Next.js itself. There is no fix short of downgrading Next to v9; the app pins the patched
   15.5.22.
+
+---
+
+## Tech stack
+
+Next.js 15 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 · OpenAI Responses API ·
+[Prava](https://prava.space) for PCI-compliant payments · [Senso](https://senso.ai) for merchant
+trust · [Linq](https://linqapp.com) for iMessage/SMS · Supabase (optional persistence)

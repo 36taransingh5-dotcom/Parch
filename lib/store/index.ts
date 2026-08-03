@@ -8,6 +8,7 @@ import type {
   Subscription,
   Transaction,
 } from '@/lib/types';
+import { signApproval } from '@/lib/approvals/proof';
 import { addMonths, daysUntil, id, monthlyEquivalent } from '@/lib/utils';
 import { createFileDriver } from './file-driver';
 import { createSupabaseDriver } from './supabase-driver';
@@ -154,6 +155,7 @@ export async function createApproval(
     created_at: new Date().toISOString(),
     decided_at: null,
   };
+  row.proof = signApproval(row);
   return driver().insertApproval(row);
 }
 

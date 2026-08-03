@@ -1,5 +1,7 @@
+import { verifyApproval } from '@/lib/approvals/proof';
 import { getPaymentResult, reportStatus } from '@/lib/prava/client';
 import { getApproval, recordPurchase } from '@/lib/store';
+import type { Approval } from '@/lib/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * then write the purchase, subscription, invoice and transaction.
  */
 export async function POST(request: Request) {
-  let body: { sessionId?: string; approvalId?: string };
+  let body: { sessionId?: string; approvalId?: string; approval?: Approval };
   try {
     body = await request.json();
   } catch {
@@ -75,7 +77,15 @@ export async function POST(request: Request) {
     }
   }
 
-  const approval = approvalId ? await getApproval(approvalId) : null;
+  const storedApproval = approvalId ? await getApproval(approvalId) : null;
+  const submittedApproval = body.approval;
+  const portableApproval =
+    submittedApproval &&
+    submittedApproval.id === approvalId &&
+    verifyApproval(submittedApproval)
+      ? submittedApproval
+      : null;
+  const approval = storedApproval ?? portableApproval;
   if (!approval) {
     return Response.json(
       { status: 'failed', message: 'The approval behind this payment could not be found.' },

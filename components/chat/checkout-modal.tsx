@@ -101,7 +101,11 @@ export function CheckoutModal({
       const res = await fetch('/api/prava/result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: session.session_id, approvalId: approval.id }),
+        body: JSON.stringify({
+          sessionId: session.session_id,
+          approvalId: approval.id,
+          approval,
+        }),
       });
       const data = await res.json();
 
@@ -120,7 +124,7 @@ export function CheckoutModal({
     } catch {
       // Transient network error — the next tick tries again.
     }
-  }, [approval.id, session.session_id, onComplete]);
+  }, [approval, session.session_id, onComplete]);
 
   useEffect(() => {
     if (phase !== 'settling') return;

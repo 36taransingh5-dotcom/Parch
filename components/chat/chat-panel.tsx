@@ -212,7 +212,7 @@ export function ChatPanel() {
       const res = await fetch(`/api/approvals/${approval.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decision: 'approve' }),
+        body: JSON.stringify({ decision: 'approve', approval }),
       });
       const data = await res.json();
 
@@ -234,7 +234,7 @@ export function ChatPanel() {
     await fetch(`/api/approvals/${approval.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ decision: 'decline' }),
+      body: JSON.stringify({ decision: 'decline', approval }),
     }).catch(() => undefined);
 
     setMessages((prev) => [

@@ -171,6 +171,8 @@ export interface Subscription {
 
 export interface Approval {
   id: string;
+  /** HMAC proof that lets serverless functions verify this approval payload. */
+  proof?: string;
   company_id: string;
   requested_by: string;
   approved_by: string | null;

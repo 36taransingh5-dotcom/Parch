@@ -1,6 +1,8 @@
 import { getVendor } from '@/lib/catalog/vendors';
+import { verifyApproval } from '@/lib/approvals/proof';
 import { createSession, pravaMode } from '@/lib/prava/client';
 import { decideApproval, getApproval } from '@/lib/store';
+import type { Approval } from '@/lib/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,16 +18,25 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
 
-  let body: { decision?: 'approve' | 'decline' };
+  let body: { decision?: 'approve' | 'decline'; approval?: Approval };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const approval = await getApproval(id);
+  // On Vercel, separate route handlers can execute in different isolated
+  // instances, so the file/memory fallback may not contain the approval made
+  // by /api/chat. The signed payload is the portable source of truth.
+  const storedApproval = await getApproval(id);
+  const portableApproval =
+    body.approval?.id === id && verifyApproval(body.approval) ? body.approval : null;
+  const approval = storedApproval ?? portableApproval;
   if (!approval) {
-    return Response.json({ error: 'Approval not found' }, { status: 404 });
+    return Response.json(
+      { error: 'This approval expired. Ask Parch to prepare it again.' },
+      { status: 404 },
+    );
   }
   if (approval.status !== 'pending') {
     return Response.json(
@@ -37,7 +48,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const approvedBy = process.env.DEMO_USER_EMAIL || 'founder@acme.dev';
 
   if (body.decision === 'decline') {
-    const declined = await decideApproval(id, 'declined', approvedBy);
+    const declined =
+      (await decideApproval(id, 'declined', approvedBy)) ?? {
+        ...approval,
+        status: 'declined' as const,
+        approved_by: approvedBy,
+        decided_at: new Date().toISOString(),
+      };
     return Response.json({ approval: declined, session: null });
   }
 
@@ -80,7 +97,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     );
   }
 
-  const updated = await decideApproval(id, 'approved', approvedBy);
+  const updated =
+    (await decideApproval(id, 'approved', approvedBy)) ?? {
+      ...approval,
+      status: 'approved' as const,
+      approved_by: approvedBy,
+      decided_at: new Date().toISOString(),
+    };
 
   return Response.json({
     approval: updated,
